@@ -203,6 +203,30 @@
     document.body.offsetHeight; // force reflow to prevent scroll
   };
 
+  function showLoading() {
+    var loadingBar = document.getElementById('loadingProgressG');
+    if (loadingBar && loadingBar.style.display === 'block') {
+      return;
+    }
+    if (!loadingBar) {
+      loadingBar = document.createElement("div");
+      var loadingBar2 = document.createElement("div");
+      loadingBar.id = 'loadingProgressG';
+      loadingBar2.id = 'loadingProgressG_1';
+
+      document.body.appendChild(loadingBar);
+      loadingBar.appendChild(loadingBar2);
+    }
+    loadingBar.style.display = 'block';
+  }
+
+  function hideLoading() {
+    var loadingBar = document.getElementById('loadingProgressG');
+    if (!loadingBar || loadingBar.style.display === 'none') {
+      return;
+    }
+    loadingBar.style.display = 'none';
+  }
 
   // Core PUSH functionality
   // =======================
@@ -233,6 +257,7 @@
         clearTimeout(options._timeout);
       }
       if (xhr.readyState === 4) {
+        hideLoading();
         if (xhr.status === 200) {
           success(xhr, options);
         } else {
@@ -257,6 +282,7 @@
       options._timeout = setTimeout(function () {  xhr.abort('timeout'); }, options.timeout);
     }
 
+    showLoading();
     xhr.send();
 
     if (xhr.readyState && !options.ignorePush) {
