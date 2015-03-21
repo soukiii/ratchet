@@ -239,7 +239,10 @@
 
     if (!options.ignorePush && window._gaq) {
       _gaq.push(['_trackPageview']); // google analytics
+    } else if (!options.ignorePush && window.ga) {
+      ga('send', 'pageview'); // universal analytics
     }
+    
     if (!options.hash) {
       return;
     }
