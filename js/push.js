@@ -533,7 +533,7 @@
       });
     }
   });
-  //window.addEventListener('popstate', popstate);
+  window.addEventListener('popstate', popstate);
 
   // TODO : Remove this line in the next major version
   window.PUSH = PUSH;
