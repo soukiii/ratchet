@@ -242,7 +242,7 @@
     } else if (!options.ignorePush && window.ga) {
       ga('send', 'pageview'); // universal analytics
     }
-    
+
     if (!options.hash) {
       return;
     }
@@ -424,7 +424,7 @@
   // Attach PUSH event handlers
   // ==========================
 
-  window.addEventListener('touchstart', function () { isScrolling = false; });
+ /* window.addEventListener('touchstart', function () { isScrolling = false; });
   window.addEventListener('touchmove', function () { isScrolling = true; });
   window.addEventListener('touchend', function (e) {
     var target = getTarget(e);
@@ -441,10 +441,16 @@
       timeout: target.getAttribute('data-timeout'),
       transition: target.getAttribute('data-transition')
     });
-  });
+  });*/
   window.addEventListener('click', function (e) {
-    if (getTarget(e)) {
+    if (e.target.tagName==='A') {
       e.preventDefault();
+      PUSH({
+        url: e.target.href,
+        hash: e.target.hash,
+        timeout: e.target.getAttribute('data-timeout'),
+        transition: e.target.getAttribute('data-transition')
+      });
     }
   });
 
