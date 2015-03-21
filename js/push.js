@@ -88,23 +88,6 @@
     return JSON.parse(cacheMapping[id] || null) || {};
   };
 
-  var getTarget = function (e) {
-    var target = findTarget(e.target);
-
-    if (!target ||
-        e.which > 1 ||
-        e.metaKey ||
-        e.ctrlKey ||
-        isScrolling ||
-        location.protocol !== target.protocol ||
-        location.host     !== target.host ||
-        !target.hash && /#/.test(target.href) ||
-        target.hash && target.href.replace(target.hash, '') === location.href.replace(location.hash, '') ||
-        target.getAttribute('data-ignore') === 'push') { return; }
-
-    return target;
-  };
-
   function showLoading() {
     var loadingBar = document.getElementById('loadingProgressG');
     if (loadingBar && loadingBar.style.display === 'block') {
@@ -344,19 +327,6 @@
     window.dispatchEvent(e);
   };
 
-  var findTarget = function (target) {
-    var i;
-    var toggles = document.querySelectorAll('a');
-
-    for (; target && target !== document; target = target.parentNode) {
-      for (i = toggles.length; i--;) {
-        if (toggles[i] === target) {
-          return target;
-        }
-      }
-    }
-  };
-
   var locationReplace = function (url) {
     window.history.replaceState(null, '', '#');
     window.location.replace(url);
@@ -423,27 +393,9 @@
 
   // Attach PUSH event handlers
   // ==========================
-
- /* window.addEventListener('touchstart', function () { isScrolling = false; });
-  window.addEventListener('touchmove', function () { isScrolling = true; });
-  window.addEventListener('touchend', function (e) {
-    var target = getTarget(e);
-
-    if (!target) {
-      return;
-    }
-
-    e.preventDefault();
-
-    PUSH({
-      url: target.href,
-      hash: target.hash,
-      timeout: target.getAttribute('data-timeout'),
-      transition: target.getAttribute('data-transition')
-    });
-  });*/
-  window.addEventListener('click', function (e) {
-    if (e.target.tagName==='A') {
+  FastClick.attach(document.body);
+  document.body.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A') {
       e.preventDefault();
       PUSH({
         url: e.target.href,
