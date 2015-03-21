@@ -105,104 +105,6 @@
     return target;
   };
 
-
-  // Main event handlers (touchend, popstate)
-  // ==========================================
-
-  var touchend = function (e) {
-    var target = getTarget(e);
-
-    if (!target) {
-      return;
-    }
-
-    e.preventDefault();
-
-    PUSH({
-      url        : target.href,
-      hash       : target.hash,
-      timeout    : target.getAttribute('data-timeout'),
-      transition : target.getAttribute('data-transition')
-    });
-  };
-
-  var popstate = function (e) {
-    var key;
-    var barElement;
-    var activeObj;
-    var activeDom;
-    var direction;
-    var transition;
-    var transitionFrom;
-    var transitionFromObj;
-    var id = e.state;
-
-    if (!id || !cacheMapping[id]) {
-      return;
-    }
-
-    direction = PUSH.id < id ? 'forward' : 'back';
-
-    cachePop(id, direction);
-
-    activeObj = getCached(id);
-    activeDom = domCache[id];
-
-    if (activeObj.title) {
-      document.title = activeObj.title;
-    }
-
-    if (direction === 'back') {
-      transitionFrom    = JSON.parse(direction === 'back' ? cacheMapping.cacheForwardStack : cacheMapping.cacheBackStack);
-      transitionFromObj = getCached(transitionFrom[transitionFrom.length - 1]);
-    } else {
-      transitionFromObj = activeObj;
-    }
-
-    if (direction === 'back' && !transitionFromObj.id) {
-      return (PUSH.id = id);
-    }
-
-    transition = direction === 'back' ? transitionMap[transitionFromObj.transition] : transitionFromObj.transition;
-
-    if (!activeDom) {
-      return PUSH({
-        id         : activeObj.id,
-        url        : activeObj.url,
-        title      : activeObj.title,
-        timeout    : activeObj.timeout,
-        transition : transition,
-        ignorePush : true
-      });
-    }
-
-    if (transitionFromObj.transition) {
-      activeObj = extendWithDom(activeObj, '.content', activeDom.cloneNode(true));
-      for (key in bars) {
-        if (bars.hasOwnProperty(key)) {
-          barElement = document.querySelector(bars[key]);
-          if (activeObj[key]) {
-            swapContent(activeObj[key], barElement);
-          } else if (barElement) {
-            barElement.parentNode.removeChild(barElement);
-          }
-        }
-      }
-    }
-
-    swapContent(
-      (activeObj.contents || activeDom).cloneNode(true),
-      document.querySelector('.content'),
-      transition, function () {
-        triggerStateChange();
-      }
-    );
-
-    PUSH.id = id;
-
-    document.body.offsetHeight; // force reflow to prevent scroll
-  };
-
   function showLoading() {
     var loadingBar = document.getElementById('loadingProgressG');
     if (loadingBar && loadingBar.style.display === 'block') {
@@ -521,13 +423,27 @@
 
   window.addEventListener('touchstart', function () { isScrolling = false; });
   window.addEventListener('touchmove', function () { isScrolling = true; });
-  window.addEventListener('touchend', touchend);
+  window.addEventListener('touchend', function (e) {
+    var target = getTarget(e);
+
+    if (!target) {
+      return;
+    }
+
+    e.preventDefault();
+
+    PUSH({
+      url: target.href,
+      hash: target.hash,
+      timeout: target.getAttribute('data-timeout'),
+      transition: target.getAttribute('data-transition')
+    });
+  });
   window.addEventListener('click', function (e) {
     if (getTarget(e)) {
       e.preventDefault();
     }
   });
-  //window.addEventListener('popstate', popstate);
 
   // TODO : Remove this line in the next major version
   window.PUSH = PUSH;
