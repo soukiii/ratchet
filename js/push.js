@@ -165,6 +165,12 @@
 
     transition = direction === 'back' ? transitionMap[transitionFromObj.transition] : transitionFromObj.transition;
 
+    /* slide-out looks confusing with edge-swipe */
+    var p = navigator.platform;
+    if (p === 'iPad' || p === 'iPhone' || p === 'iPod') {
+      transition = null;
+    }
+
     if (!activeDom) {
       return PUSH({
         id         : activeObj.id,
