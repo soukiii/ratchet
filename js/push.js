@@ -528,17 +528,25 @@
   // Attach PUSH event handlers
   // ==========================
   FastClick.attach(document.body);
-  document.body.addEventListener('click', function (e) {
-    if (e.target.tagName === 'A') {
-      e.preventDefault();
-      PUSH({
-        url: e.target.href,
-        hash: e.target.hash,
-        timeout: e.target.getAttribute('data-timeout'),
-        transition: e.target.getAttribute('data-transition')
-      });
-    }
-  });
+    document.body.addEventListener('click', function (e) {
+        var link = e.target;
+        if (link.tagName !== 'A') {
+            while (link = link.parentNode) {
+                if (link.tagName === 'A') {
+                    break;
+                }
+            }
+        }
+        if (link.tagName === 'A') {
+            e.preventDefault();
+            PUSH({
+                url: link.href,
+                hash: link.hash,
+                timeout: link.getAttribute('data-timeout'),
+                transition: link.getAttribute('data-transition')
+            });
+        }
+    });
   window.addEventListener('popstate', popstate);
 
   // TODO : Remove this line in the next major version
