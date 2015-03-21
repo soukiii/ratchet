@@ -88,34 +88,45 @@
     return JSON.parse(cacheMapping[id] || null) || {};
   };
 
-  function showLoading() {
-    var loadingBar = document.getElementById('loadingProgressG');
-    if (loadingBar && loadingBar.style.display === 'block') {
-      return;
-    }
-    if (!loadingBar) {
-      loadingBar = document.createElement("div");
-      var loadingBar2 = document.createElement("div");
-      loadingBar.id = 'loadingProgressG';
-      loadingBar2.id = 'loadingProgressG_1';
+  var getTarget = function (e) {
+    var target = findTarget(e.target);
 
-      document.body.appendChild(loadingBar);
-      loadingBar.appendChild(loadingBar2);
-    }
-    loadingBar.style.display = 'block';
-  }
+    if (!target ||
+        e.which > 1 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        isScrolling ||
+        location.protocol !== target.protocol ||
+        location.host     !== target.host ||
+        !target.hash && /#/.test(target.href) ||
+        target.hash && target.href.replace(target.hash, '') === location.href.replace(location.hash, '') ||
+        target.getAttribute('data-ignore') === 'push') { return; }
 
-  function hideLoading() {
-    var loadingBar = document.getElementById('loadingProgressG');
-    if (!loadingBar || loadingBar.style.display === 'none') {
-      return;
-    }
-    loadingBar.style.display = 'none';
-  }
+    return target;
+  };
 
-  // history event handler (popState)
+
+  // Main event handlers (touchend, popstate)
   // ==========================================
-  var popState = function (e) {
+
+  var touchend = function (e) {
+    var target = getTarget(e);
+
+    if (!target) {
+      return;
+    }
+
+    e.preventDefault();
+
+    PUSH({
+      url        : target.href,
+      hash       : target.hash,
+      timeout    : target.getAttribute('data-timeout'),
+      transition : target.getAttribute('data-transition')
+    });
+  };
+
+  var popstate = function (e) {
     var key;
     var barElement;
     var activeObj;
@@ -191,6 +202,32 @@
 
     document.body.offsetHeight; // force reflow to prevent scroll
   };
+
+
+  function showLoading() {
+    var loadingBar = document.getElementById('loadingProgressG');
+    if (loadingBar && loadingBar.style.display === 'block') {
+      return;
+    }
+    if (!loadingBar) {
+      loadingBar = document.createElement("div");
+      var loadingBar2 = document.createElement("div");
+      loadingBar.id = 'loadingProgressG';
+      loadingBar2.id = 'loadingProgressG_1';
+
+      document.body.appendChild(loadingBar);
+      loadingBar.appendChild(loadingBar2);
+    }
+    loadingBar.style.display = 'block';
+  }
+
+  function hideLoading() {
+    var loadingBar = document.getElementById('loadingProgressG');
+    if (!loadingBar || loadingBar.style.display === 'none') {
+      return;
+    }
+    loadingBar.style.display = 'none';
+  }
 
   // Core PUSH functionality
   // =======================
@@ -304,7 +341,6 @@
     } else if (!options.ignorePush && window.ga) {
       ga('send', 'pageview'); // universal analytics
     }
-
     if (!options.hash) {
       return;
     }
@@ -406,6 +442,19 @@
     window.dispatchEvent(e);
   };
 
+  var findTarget = function (target) {
+    var i;
+    var toggles = document.querySelectorAll('a');
+
+    for (; target && target !== document; target = target.parentNode) {
+      for (i = toggles.length; i--;) {
+        if (toggles[i] === target) {
+          return target;
+        }
+      }
+    }
+  };
+
   var locationReplace = function (url) {
     window.history.replaceState(null, '', '#');
     window.location.replace(url);
@@ -484,7 +533,7 @@
       });
     }
   });
-  window.addEventListener('popstate', popState);
+  window.addEventListener('popstate', popstate);
 
   // TODO : Remove this line in the next major version
   window.PUSH = PUSH;
