@@ -537,7 +537,7 @@
                 }
             }
         }
-        if (link && link.tagName === 'A') {
+        if (link && link.tagName === 'A' && link.hasAttribute('href')) {
             e.preventDefault();
             PUSH({
                 url: link.href,
